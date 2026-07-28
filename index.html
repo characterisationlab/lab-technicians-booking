@@ -945,43 +945,26 @@ localStorage.setItem("lastEmail", email);
       }
     });
 
-   modal.querySelector("#btnForgot").addEventListener("click", async () => {
-  msg.textContent = "";
-  const email = (emailEl.value || "").trim();
-  localStorage.setItem("lastEmail", email);
+    modal.querySelector("#btnForgot").addEventListener("click", async () => {
+      msg.textContent = "";
+      const email = (emailEl.value || "").trim();
+localStorage.setItem("lastEmail", email);
 
-  console.log("=== PASSWORD RESET TEST ===");
-  console.log("Email:", email);
-
-  if (!email) {
-    msg.textContent = "Type your email first (then click Forgot password).";
-    return;
-  }
-
-  try {
-    const result = await sendPasswordResetEmail(auth, email);
-
-    console.log("SUCCESS");
-    console.log(result);
-
-    msg.style.color = "#16a34a";
-    msg.textContent = "Password reset email sent.";
-
-  } catch (e) {
-
-    console.error("FULL ERROR:", e);
-    console.log("CODE:", e.code);
-    console.log("MESSAGE:", e.message);
-
-    alert(
-      "Code: " + e.code +
-      "\nMessage: " + e.message
-    );
-
-    msg.style.color = "#dc2626";
-    msg.textContent = e.code + " : " + e.message;
-  }
-});
+      
+      if (!email) {
+        msg.textContent = "Type your email first (then click Forgot password).";
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        msg.style.color = "#16a34a";
+        msg.textContent = "Password reset email sent.";
+      } catch (e) {
+        console.error(e);
+        msg.style.color = "#dc2626";
+        msg.textContent = "Could not send reset email (check address).";
+      }
+    });
   }
 
   function showLogin() {
