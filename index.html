@@ -19,6 +19,7 @@
       --lara: #f97316;
       --stefanija: #eab308;
       --klara: #1e3a8a;
+      --nickname: #ff1493;
       --absence-outline: #3b82f6;
       --tag-bg: #eef2f7;
 --tag-border: #cbd5e1;
@@ -378,6 +379,7 @@
     .pill.lara { background: var(--lara); }
     .pill.stefanija { background: var(--stefanija); }
     .pill.klara { background: var(--klara); }
+    .pill.nickname { background: var(--nickname); }
 
     /* --- ABSENCE pills: same color, but hatched/pattern --- */
 .pill.absence{
@@ -538,6 +540,7 @@
               <option value="Lara">Lara</option>
               <option value="Stefanija">Stefanija</option>
               <option value="Klara">Klara</option>
+              <option value="Nickname">Nickname</option>
 
             </select>
           </div>
@@ -605,6 +608,7 @@
           <div class="legend-item"><span class="legend-dot" style="background: var(--lara)"></span>Lara</div>
           <div class="legend-item"><span class="legend-dot" style="background: var(--stefanija)"></span>Stefanija</div>
           <div class="legend-item"><span class="legend-dot" style="background: var(--klara)"></span>Klara</div>
+            <div class="legend-item"><span class="legend-dot" style="background: var(--nickname)"></span>Nickname </div>
         </div>
         <div class="legend-info">
   Click a coloured bar in the calendar to view details. If it is your assignment – you can edit/delete it.
@@ -630,6 +634,7 @@ Any assignment that falls on an absence day is kept, but marked with a <b>red ou
   <option value="Lara">Lara</option>
   <option value="Stefanija">Stefanija</option>
   <option value="Klara">Klara</option>
+  <option value="Nickname">Nickname</option>
 </select>
 
 </div>
@@ -696,6 +701,7 @@ Any assignment that falls on an absence day is kept, but marked with a <b>red ou
           <option value="Lara">Lara</option>
           <option value="Stefanija">Stefanija</option>
           <option value="Klara">Klara</option>
+          <option value="Nickname">Nickname</option>
         </select>
       </div>
 
@@ -748,6 +754,7 @@ Any assignment that falls on an absence day is kept, but marked with a <b>red ou
             <option value="Lara">Lara</option>
             <option value="Stefanija">Stefanija</option>
             <option value="Klara">Klara</option>
+            <option value="Nickname">Nickname</option>
           </select>
         </div>
 
@@ -1114,7 +1121,7 @@ const bmDeleteBtn = document.getElementById("bmDeleteBtn");
 let modalBooking = null;     // aktualnie oglądany booking (obiekt z bookings[])
 let modalEditMode = false;   // czy modal jest w trybie edycji
 
-   const TECHNICIANS = ["Sasi", "Lara", "Stefanija", "Klara"];
+   const TECHNICIANS = ["Sasi", "Lara", "Stefanija", "Klara", "Nickname"];
    
 function openBookingModal(booking) {
   modalBooking = booking;
@@ -1502,15 +1509,19 @@ amSaveBtn.addEventListener("click", async () => {
 });
 
    
-  function technicianClass(name) {
-    const n = (name || "").toLowerCase();
-    if (n === "sasi") return "sasi";
-    if (n === "viviana") return "viviana";
-    if (n === "simon") return "simon";
-    if (n === "lara") return "lara";
-    if (n === "klara") return "klara";
-    return "stefanija";
-  }
+function technicianClass(name) {
+  const n = (name || "").trim().toLowerCase();
+
+  if (n === "sasi") return "sasi";
+  if (n === "viviana") return "viviana";
+  if (n === "simon") return "simon";
+  if (n === "lara") return "lara";
+  if (n === "stefanija") return "stefanija";
+  if (n === "klara") return "klara";
+  if (n === "nickname") return "nickname";
+
+  return "";
+}
 
   // View (persist month/year)
   const savedView = JSON.parse(localStorage.getItem("labTechBookingView") || "null");
