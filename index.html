@@ -636,10 +636,11 @@ Any assignment that falls on an absence day is kept, but marked with a <b>red ou
         
         <div class="month-title" id="monthTitle"></div>
         <div class="month-nav">
-          <button class="nav-btn" id="prevMonth">&lt;</button>
-          <button class="nav-btn" id="todayBtn">Today</button>
-          <button class="nav-btn" id="nextMonth">&gt;</button>
-        </div>
+  <button class="nav-btn" id="historyBtn">Load full history</button>
+  <button class="nav-btn" id="prevMonth">&lt;</button>
+  <button class="nav-btn" id="todayBtn">Today</button>
+  <button class="nav-btn" id="nextMonth">&gt;</button>
+</div>
       </div>
       <div class="calendar-grid">
         <div class="weekday">Mon</div>
@@ -1008,6 +1009,7 @@ localStorage.setItem("lastEmail", email);
   const monthTitleEl = document.getElementById("monthTitle");
   const calendarGridEl = document.getElementById("calendarGrid");
   const bookingsListEl = document.getElementById("bookingsList");
+   const historyBtn = document.getElementById("historyBtn");
 const filterContainer = document.getElementById("filterContainer");
 const technicianFilter = document.getElementById("technicianFilter");
 
@@ -2212,6 +2214,88 @@ if (isAbsence) {
   // -------------------------
   let unsubscribeBookings = null;
 
+
+let fullHistoryLoaded = false;
+
+function startBookingsListener(loadFullHistory = false) {
+  // Stop the currently active listener before starting a new one
+  if (unsubscribeBookings) {
+    unsubscribeBookings();
+    unsubscribeBookings = null;
+  }
+
+  let qBookings;
+
+  if (loadFullHistory) {
+    // Load every booking stored in Firestore
+    qBookings = query(
+      bookingsCol,
+      orderBy("start")
+    );
+  } else {
+    // Load from the first day of the previous month onwards
+    const nowForBookingRange = new Date();
+
+    const bookingRangeStart = new Date(
+      nowForBookingRange.getFullYear(),
+      nowForBookingRange.getMonth() - 1,
+      1,
+      0,
+      0,
+      0,
+      0
+    );
+
+    qBookings = query(
+      bookingsCol,
+      where("start", ">=", Timestamp.fromDate(bookingRangeStart)),
+      orderBy("start")
+    );
+  }
+
+  bookingsListEl.textContent = loadFullHistory
+    ? "Loading full history…"
+    : "Loading recent bookings…";
+
+  unsubscribeBookings = onSnapshot(
+    qBookings,
+    (snapshot) => {
+      bookings = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+
+      renderCalendar();
+      renderBookingsList();
+
+      if (
+        editingBookingId &&
+        !bookings.find((b) => b.id === editingBookingId)
+      ) {
+        resetFormToNew();
+      }
+    },
+    (err) => {
+      console.error("onSnapshot error:", err);
+      bookingsListEl.textContent = "Error loading data (see console).";
+    }
+  );
+}
+
+   
+historyBtn.addEventListener("click", () => {
+  if (!currentUid) return;
+
+  fullHistoryLoaded = !fullHistoryLoaded;
+
+  historyBtn.textContent = fullHistoryLoaded
+    ? "Use recent bookings"
+    : "Load full history";
+
+  startBookingsListener(fullHistoryLoaded);
+});
+
+   
   onAuthStateChanged(auth, async (user) => {
     // stop previous listener
     if (unsubscribeBookings) {
@@ -2279,46 +2363,12 @@ technicianFilter.value = "ALL";
     resetFormToNew();
 
   
+// Start with the reduced, recent booking range
+fullHistoryLoaded = false;
+historyBtn.textContent = "Load full history";
+startBookingsListener(false);
 
 
-   // Subscribe only from the first day of the previous month onwards
-const nowForBookingRange = new Date();
-
-const bookingRangeStart = new Date(
-  nowForBookingRange.getFullYear(),
-  nowForBookingRange.getMonth() - 1,
-  1,
-  0,
-  0,
-  0,
-  0
-);
-
-const qBookings = query(
-  bookingsCol,
-  where("start", ">=", Timestamp.fromDate(bookingRangeStart)),
-  orderBy("start")
-);
-    unsubscribeBookings = onSnapshot(
-      qBookings,
-      (snapshot) => {
-        bookings = snapshot.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data()
-        }));
-
-        renderCalendar();
-        renderBookingsList();
-
-        if (editingBookingId && !bookings.find((b) => b.id === editingBookingId)) {
-          resetFormToNew();
-        }
-      },
-      (err) => {
-        console.error("onSnapshot error:", err);
-        bookingsListEl.textContent = "Error loading data (see console).";
-      }
-    );
   }); // ✅ TO DOMYKA onAuthStateChanged
 
   // initial UI (before login)
