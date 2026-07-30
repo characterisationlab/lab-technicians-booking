@@ -2281,9 +2281,24 @@ technicianFilter.value = "ALL";
   
 
 
-    // Subscribe (ALL bookings for everyone; filtering happens in UI)
-    const qBookings = query(bookingsCol, orderBy("start"));
+   // Subscribe only from the first day of the previous month onwards
+const nowForBookingRange = new Date();
 
+const bookingRangeStart = new Date(
+  nowForBookingRange.getFullYear(),
+  nowForBookingRange.getMonth() - 1,
+  1,
+  0,
+  0,
+  0,
+  0
+);
+
+const qBookings = query(
+  bookingsCol,
+  where("start", ">=", Timestamp.fromDate(bookingRangeStart)),
+  orderBy("start")
+);
     unsubscribeBookings = onSnapshot(
       qBookings,
       (snapshot) => {
